@@ -11,7 +11,7 @@ st.markdown("""
         font-size: 28px !important;
         font-weight: bold !important;
         text-align: center !important;
-        color: #1E3A8A;
+        color: #FFFFFF;
         margin-bottom: 20px;
         min-height: 80px;
         display: flex;
