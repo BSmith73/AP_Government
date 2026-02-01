@@ -1,21 +1,38 @@
 import streamlit as st
+import time
 
 # Set page config for a wide layout
 st.set_page_config(page_title="AP Gov Jeopardy", layout="wide")
 
-# Initialize Session State
-if 'view' not in st.session_state:
-    st.session_state.view = 'board'
-if 'selected_cell' not in st.session_state:
-    st.session_state.selected_cell = None
-if 'answered' not in st.session_state:
-    st.session_state.answered = set()
-if 'score_a' not in st.session_state:
-    st.session_state.score_a = 0
-if 'score_b' not in st.session_state:
-    st.session_state.score_b = 0
+# Custom CSS for Big & Centered Text
+st.markdown("""
+    <style>
+    .big-font {
+        font-size:50px !important;
+        text-align: center;
+        font-weight: bold;
+    }
+    .answer-font {
+        font-size:40px !important;
+        text-align: center;
+        color: #2E86C1;
+    }
+    .centered-text {
+        text-align: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Data Structure
+# Initialize Session State
+if 'view' not in st.session_state: st.session_state.view = 'board'
+if 'selected_cell' not in st.session_state: st.session_state.selected_cell = None
+if 'answered' not in st.session_state: st.session_state.answered = set()
+if 'score_a' not in st.session_state: st.session_state.score_a = 0
+if 'score_b' not in st.session_state: st.session_state.score_b = 0
+if 'score_c' not in st.session_state: st.session_state.score_c = 0
+if 'score_d' not in st.session_state: st.session_state.score_d = 0
+
+# Data Structure (Same as provided)
 data = {
     "Bill of Rights": {
         100: {"q": "Which amendment protects against unlawful searches and seizures?", "a": "4th Amendment."},
@@ -56,17 +73,16 @@ data = {
 
 # --- Game Board View ---
 if st.session_state.view == 'board':
-    st.title("⚖️ AP Gov Civil Liberties & Rights Jeopardy")
+    st.title("⚖️ AP Gov Jeopardy")
     
-    # Board Grid
     cols = st.columns(len(data))
     for i, category in enumerate(data.keys()):
         with cols[i]:
-            st.markdown(f"### {category}")
+            st.markdown(f"**{category}**")
             for points in [100, 200, 300, 400, 500]:
                 key = f"{category}_{points}"
                 if key in st.session_state.answered:
-                    st.button(f"DONE", key=key, disabled=True, use_container_width=True)
+                    st.button("X", key=key, disabled=True, use_container_width=True)
                 else:
                     if st.button(f"${points}", key=key, use_container_width=True):
                         st.session_state.selected_cell = (category, points)
@@ -76,34 +92,53 @@ if st.session_state.view == 'board':
     
     st.markdown("---")
     
-    # Scoreboard
-    st.subheader("Score Tracker")
-    score_col1, score_col2 = st.columns(2)
-    with score_col1:
-        st.write(f"**Team A: {st.session_state.score_a}**")
-        sc_a1, sc_a2 = st.columns(2)
-        if sc_a1.button("+100", key="a_plus"): st.session_state.score_a += 100; st.rerun()
-        if sc_a2.button("-100", key="a_minus"): st.session_state.score_a -= 100; st.rerun()
-            
-    with score_col2:
-        st.write(f"**Team B: {st.session_state.score_b}**")
-        sc_b1, sc_b2 = st.columns(2)
-        if sc_b1.button("+100", key="b_plus"): st.session_state.score_b += 100; st.rerun()
-        if sc_b2.button("-100", key="b_minus"): st.session_state.score_b -= 100; st.rerun()
+    # Scoreboard (4 Teams)
+    st.subheader("Scoreboard")
+    sc1, sc2, sc3, sc4 = st.columns(4)
+    teams = [("Team A", "score_a", sc1), ("Team B", "score_b", sc2), ("Team C", "score_c", sc3), ("Team D", "score_d", sc4)]
+    
+    for name, key, col in teams:
+        with col:
+            st.write(f"**{name}: {st.session_state[key]}**")
+            b1, b2 = st.columns(2)
+            if b1.button(f"+100", key=f"{key}_p"): st.session_state[key] += 100; st.rerun()
+            if b2.button(f"-100", key=f"{key}_m"): st.session_state[key] -= 100; st.rerun()
+
+    if st.button("RESET GAME", type="primary", use_container_width=True):
+        st.session_state.answered = set()
+        st.session_state.score_a = 0
+        st.session_state.score_b = 0
+        st.session_state.score_c = 0
+        st.session_state.score_d = 0
+        st.rerun()
 
 # --- Question View ---
 elif st.session_state.view == 'question':
     cat, pts = st.session_state.selected_cell
     q_data = data[cat][pts]
     
-    st.title(f"{cat} - ${pts}")
-    st.markdown("---")
-    st.header(q_data['q'])
-    st.write("")
+    st.markdown(f"<h3 class='centered-text'>{cat} - ${pts}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<p class='big-font'>{q_data['q']}</p>", unsafe_allow_html=True)
     
-    if st.button("Show Answer"):
-        st.subheader(q_data['a'])
+    # Timer Logic
+    timer_placeholder = st.empty()
     
-    if st.button("Back to Board"):
+    # Simple logic: auto-starts after selection
+    # For a true "auto-run" in Streamlit, we loop:
+    for i in range(15, -1, -1):
+        timer_placeholder.warning(f"Reading Time: {i} seconds remaining...")
+        time.sleep(1)
+    
+    for i in range(60, -1, -1):
+        timer_placeholder.error(f"TIME REMAINING: {i} seconds!")
+        time.sleep(1)
+        if i == 0:
+            st.balloons()
+            timer_placeholder.error("TIME IS UP!")
+
+    if st.button("Show Answer", use_container_width=True):
+        st.markdown(f"<p class='answer-font'>{q_data['a']}</p>", unsafe_allow_html=True)
+    
+    if st.button("Back to Board", use_container_width=True):
         st.session_state.view = 'board'
         st.rerun()
