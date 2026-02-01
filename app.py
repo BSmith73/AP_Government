@@ -4,9 +4,20 @@ import time
 # Set page config
 st.set_page_config(page_title="AP Gov Jeopardy", layout="wide")
 
-# Custom CSS for Big & Centered Text
+# Custom CSS for Big & Centered Text and Headers
 st.markdown("""
     <style>
+    .category-header {
+        font-size: 28px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        color: #1E3A8A;
+        margin-bottom: 20px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .big-font {
         font-size:50px !important;
         text-align: center;
@@ -77,11 +88,14 @@ data = {
 
 # --- Game Board View ---
 if st.session_state.view == 'board':
-    st.title("⚖️ AP Gov Jeopardy")
+    st.markdown("<h1 style='text-align: center;'>⚖️ AP Gov Jeopardy</h1>", unsafe_allow_html=True)
+    st.write("")
+    
     cols = st.columns(len(data))
     for i, category in enumerate(data.keys()):
         with cols[i]:
-            st.markdown(f"**{category}**")
+            # Big, Bolded, Centered Header
+            st.markdown(f"<div class='category-header'>{category}</div>", unsafe_allow_html=True)
             for points in [100, 200, 300, 400, 500]:
                 key = f"{category}_{points}"
                 if key in st.session_state.answered:
@@ -117,28 +131,21 @@ elif st.session_state.view == 'question':
     st.markdown(f"<h3 class='centered-text'>{cat} - ${pts}</h3>", unsafe_allow_html=True)
     st.markdown(f"<div class='big-font'>{q_data['q']}</div>", unsafe_allow_html=True)
     
-    # Show Answer Button (Always Available)
     if not st.session_state.show_answer:
         if st.button("SHOW ANSWER", type="primary", use_container_width=True):
             st.session_state.show_answer = True
             st.rerun()
 
-    # Timer Logic (Only runs if answer isn't shown)
     if not st.session_state.show_answer:
         timer_placeholder = st.empty()
-        # 10s Reading Timer
         for i in range(10, -1, -1):
             timer_placeholder.warning(f"Reading Time: {i}s")
             time.sleep(1)
-            # Check if button was clicked during sleep (requires rerun check)
-        
-        # 60s Answer Timer
         for i in range(60, -1, -1):
             timer_placeholder.error(f"TIME REMAINING: {i}s")
             time.sleep(1)
             if i == 0: timer_placeholder.error("TIME IS UP!")
 
-    # Display Answer
     if st.session_state.show_answer:
         st.markdown(f"<div class='answer-font'>{q_data['a']}</div>", unsafe_allow_html=True)
         if st.button("BACK TO BOARD", use_container_width=True):
