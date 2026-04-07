@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Gov Jeopardy</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #31333F;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .category-header {
+            font-size: 28px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            color: #1E3A8A;
+            margin-bottom: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .board-btn {
+            background-color: #f0f2f6;
+            border: 1px solid #d1d5db;
+            color: #31333F;
+            padding: 20px 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .board-btn:hover:not(:disabled) {
+            background-color: #e5e7eb;
+            color: #ff4b4b;
+            border-color: #ff4b4b;
+        }
+        .board-btn:disabled {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #e5e7eb;
+            margin: 30px 0;
+        }
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .team-box p {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .score-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .score-btn {
+            padding: 5px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .score-btn:hover {
+            border-color: #ff4b4b;
+            color: #ff4b4b;
+        }
+        .reset-btn {
+            background-color: #ff4b4b;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .reset-btn:hover {
+            background-color: #ff3333;
+        }
+        .primary-btn {
+            background-color: #ff4b4b;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .primary-btn:hover {
+            background-color: #ff3333;
+        }
+        .secondary-btn {
+            background-color: #f0f2f6;
+            color: #31333F;
+            border: 1px solid #d1d5db;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .secondary-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Question View Styles */
+        #question-view {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+        .centered-text {
+            text-align: center;
+            color: #6b7280;
+        }
+        .big-font {
+            font-size: 50px !important;
+            text-align: center;
+            font-weight: bold;
+            padding: 20px;
+        }
+        .answer-font {
+            font-size: 45px !important;
+            text-align: center;
+            color: #2E86C1;
+            background-color: #f0f2f6;
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .timer-alert {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .timer-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .timer-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="board-view">
+        <h1>⚖️ AP Gov Unit 5 Jeopardy</h1>
+        <br>
+        <div class="board-grid" id="board">
+            </div>
+
+        <hr>
+        <h2>Scoreboard</h2>
+        <div class="scoreboard">
+            <div class="team-box">
+                <p><strong>Team A: <span id="score-a">0</span></strong></p>
+                <div class="score-btn-group">
+                    <button class="score-btn" onclick="updateScore('a', 100)">+100</button>
+                    <button class="score-btn" onclick="updateScore('a', -100)">-100</button>
+                </div>
+            </div>
+            <div class="team-box">
+                <p><strong>Team B: <span id="score-b">0</span></strong></p>
+                <div class="score-btn-group">
+                    <button class="score-btn" onclick="updateScore('b', 100)">+100</button>
+                    <button class="score-btn" onclick="updateScore('b', -100)">-100</button>
+                </div>
+            </div>
+            <div class="team-box">
+                <p><strong>Team C: <span id="score-c">0</span></strong></p>
+                <div class="score-btn-group">
+                    <button class="score-btn" onclick="updateScore('c', 100)">+100</button>
+                    <button class="score-btn" onclick="updateScore('c', -100)">-100</button>
+                </div>
+            </div>
+            <div class="team-box">
+                <p><strong>Team D: <span id="score-d">0</span></strong></p>
+                <div class="score-btn-group">
+                    <button class="score-btn" onclick="updateScore('d', 100)">+100</button>
+                    <button class="score-btn" onclick="updateScore('d', -100)">-100</button>
+                </div>
+            </div>
+        </div>
+        <button class="reset-btn" onclick="resetGame()">RESET GAME</button>
+    </div>
+
+    <div id="question-view">
+        <h3 class="centered-text" id="question-category"></h3>
+        <div class="big-font" id="question-text"></div>
+        
+        <div id="timer-display" class="timer-alert timer-warning"></div>
+        
+        <button id="show-answer-btn" class="primary-btn" onclick="showAnswer()">SHOW ANSWER</button>
+        
+        <div class="answer-font" id="answer-text"></div>
+        
+        <button id="back-to-board-btn" class="secondary-btn" style="display:none;" onclick="backToBoard()">BACK TO BOARD</button>
+    </div>
+
+    <script>
+        const data = {
+            "Voting Rights and Behavior": {
+                100: { q: "Which amendment secured women the right to vote?", a: "19th Amendment" },
+                200: { q: "Name any current structural barrier to voting.", a: "Registering to Vote<br>Difficulty getting to polling center<br>Voter ID Laws<br>Language Barrier<br>Half Points:<br>Poll Taxes<br>Literacy Tests" },
+                300: { q: "Which type of election always has lower voter turnout?", a: "Mid-Term Elections" },
+                400: { q: "What are the four types of voting models? (100 each)", a: "Rational Choice Voting<br>Retrospective Voting<br>Prospective Voting<br>Straight Ticket Voting" },
+                500: { q: "Which amendment secures the right to vote for people over 18 years old?", a: "26th Amendment" }
+            },
+            "Linkage Institutions": {
+                100: { q: "More than any type of media, this type has led to more reinforcement of someone's current political beliefs.", a: "Social Media" },
+                200: { q: "The term for when the media is only reporting on the poll rankings and not the policy of candidates.", a: "Horserace Journalism" },
+                300: { q: "What is the term that describe the relationship between Congress, the Bureaucracy, and Interest Groups?", a: "Iron Triangle" },
+                400: { q: "Name up to four ways interest groups can influence politics (100 points each)", a: "Educate Voters/Office Holders<br>Mobilize Members<br>Engage in Lobbying<br>Draft Legislation/Briefs" },
+                500: { q: "Sometimes people benefit from interest groups without contributing to them. How would interest groups describe this situation?", a: "The Free Rider Problem" }
+            },
+            "Elections!": {
+                100: { q: "This clearly states the goals and policies for a political party.", a: "Party Platform" },
+                200: { q: "Who actually votes for the president? +100 if you also say how many votes they need.", a: "Electoral College;<br>270 votes" },
+                300: { q: "Who is more likely to win due to the incumbency advantage? The President or a Legislator?", a: "Legislator" },
+                400: { q: "Name at least 4 reasons why the incumbency advantage works. (100 points each)", a: "Name Reelection<br>Proven Track Record<br>Established Funding Sources<br>Established Campaigning Team<br>Safe Districts" },
+                500: { q: "While many states use primaries to narrow down a party's president-elect, some states use another method. What is it called?", a: "Caucuses" }
+            },
+            "Even More Elections!": {
+                100: { q: "True or False can a president-elect lose the popular vote (have the most votes) but win an election?", a: "True!" },
+                200: { q: "This is a type of election that precedes the national convention and only allows party members to vote in it.", a: "Closed Primaries" },
+                300: { q: "Where do president-elects spend most of their time campaigning?", a: "Battleground / Swing States" },
+                400: { q: "What term best explains why third-parties are not likely to ever win an election?", a: "Winner-Take-All Districts" },
+                500: { q: "This term describes when candidates hire people to interview and talk to voters to convince them of particular policies or topics or just to learn more about what they care about.", a: "Canvassing" }
+            },
+            "Campaign Finance": {
+                100: { q: "In what area is the most campaigning money spent?", a: "Media" },
+                200: { q: "This term refers to money that is directly available for the candidates to spend.", a: "Hard Money" },
+                300: { q: "What was the real impact of Citizen's United v FEC?", a: "Formation of Super PACs/<br>Unlimited soft money spending by PACs" },
+                400: { q: "BCRA established many provisions clarifying campaign finance laws. One provision that still exists is where candidates must endorse their political ads. What is this provision called?", a: "Stand by Your Ad Provision" },
+                500: { q: "This non-required SCOTUS case determined that donating and spending money is a form of political speech.", a: "Buckley v Valeo" }
+            }
+        };
+
+        const answered = new Set();
+        const scores = { a: 0, b: 0, c: 0, d: 0 };
+        let timerInterval;
+
+        function renderBoard() {
+            const boardContainer = document.getElementById('board');
+            boardContainer.innerHTML = '';
+
+            const categories = Object.keys(data);
+            
+            // Render Headers
+            categories.forEach(category => {
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.textContent = category;
+                boardContainer.appendChild(header);
+            });
+
+            // Render Rows (100 to 500)
+            const points = [100, 200, 300, 400, 500];
+            points.forEach(point => {
+                categories.forEach(category => {
+                    const key = `${category}_${point}`;
+                    const btn = document.createElement('button');
+                    btn.className = 'board-btn';
+                    
+                    if (answered.has(key)) {
+                        btn.textContent = 'X';
+                        btn.disabled = true;
+                    } else {
+                        btn.textContent = `$${point}`;
+                        btn.onclick = () => openQuestion(category, point);
+                    }
+                    boardContainer.appendChild(btn);
+                });
+            });
+        }
+
+        function updateScore(team, amount) {
+            scores[team] += amount;
+            document.getElementById(`score-${team}`).textContent = scores[team];
+        }
+
+        function resetGame() {
+            answered.clear();
+            ['a', 'b', 'c', 'd'].forEach(t => {
+                scores[t] = 0;
+                document.getElementById(`score-${t}`).textContent = '0';
+            });
+            renderBoard();
+        }
+
+        function openQuestion(category, points) {
+            answered.add(`${category}_${points}`);
+            
+            document.getElementById('board-view').style.display = 'none';
+            document.getElementById('question-view').style.display = 'block';
+            
+            document.getElementById('question-category').textContent = `${category} - $${points}`;
+            document.getElementById('question-text').innerHTML = data[category][points].q;
+            document.getElementById('answer-text').innerHTML = data[category][points].a;
+            
+            // Reset Views
+            document.getElementById('answer-text').style.display = 'none';
+            document.getElementById('back-to-board-btn').style.display = 'none';
+            document.getElementById('show-answer-btn').style.display = 'block';
+            document.getElementById('timer-display').style.display = 'block';
+            
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let timePhase = 'reading'; // 'reading' or 'answering'
+            let timeLeft = 10;
+            const timerDisplay = document.getElementById('timer-display');
+            
+            timerDisplay.className = 'timer-alert timer-warning';
+            timerDisplay.textContent = `Reading Time: ${timeLeft}s`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timePhase === 'reading') {
+                    if (timeLeft > 0) {
+                        timerDisplay.textContent = `Reading Time: ${timeLeft}s`;
+                    } else {
+                        timePhase = 'answering';
+                        timeLeft = 60;
+                        timerDisplay.className = 'timer-alert timer-danger';
+                        timerDisplay.textContent = `TIME REMAINING: ${timeLeft}s`;
+                    }
+                } else if (timePhase === 'answering') {
+                    if (timeLeft > 0) {
+                        timerDisplay.textContent = `TIME REMAINING: ${timeLeft}s`;
+                    } else {
+                        clearInterval(timerInterval);
+                        timerDisplay.textContent = "TIME IS UP!";
+                    }
+                }
+            }, 1000);
+        }
+
+        function showAnswer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').style.display = 'none';
+            document.getElementById('show-answer-btn').style.display = 'none';
+            document.getElementById('answer-text').style.display = 'block';
+            document.getElementById('back-to-board-btn').style.display = 'block';
+        }
+
+        function backToBoard() {
+            document.getElementById('question-view').style.display = 'none';
+            document.getElementById('board-view').style.display = 'block';
+            renderBoard();
+        }
+
+        // Initialize Board on load
+        renderBoard();
+    </script>
+</body>
+</html>
